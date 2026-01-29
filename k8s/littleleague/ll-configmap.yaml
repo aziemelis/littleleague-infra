@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ll-configmap
+  namespace: littleleague # Your API namespace
+data:
+  LL_DB_HOST: "db.db.svc.cluster.local"  # Cross-ns to db ns
+  LL_DB_PORT: "5432"
+  LL_DB_NAME: "littleleague"
+  LL_DB_USER: "littleleague"
+  DB_NAME: 'postgres'
+  DB_HOST: 'db.db.svc.cluster.local'
+  DB_USER: 'postgres'
+  DB_PORT: '5432'
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://db.db.svc.cluster.local:5432/littleleague"
+  SPRING_JPA_HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+  SERVER_PORT: "8080"

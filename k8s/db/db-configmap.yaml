@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap
+  namespace: db
+data:
+  DB_NAME: 'postgres'
+  DB_HOST: 'db.db.svc.cluster.local'
+  DB_USER: 'postgres'
+  DB_PORT: '5432'
+  pg_hba.conf: |+
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+    # Local Unix socket connections (same pod/host)
+    local   all             all                                     md5
+
+    # K8s cluster-internal IPv4 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+    host    all             all             10.0.0.0/8              scram-sha-256
+    host    all             all             172.16.0.0/12           scram-sha-256
+    host    all             all             192.168.0.0/16          scram-sha-256
+
+    # IPv6 cluster (fd00::/8 ULA range common in K8s)
+    host    all             all             fd00::/8                scram-sha-256
+  postgresql.conf: |+
+    # Data Storage (K8s PVC mount)
+    data_directory = '/data/pgdata'     # Subdir on PVC mount [web:124]
+    hba_file = '/config/pg_hba.conf'    # Separate ConfigMap
+    ident_file = '/config/pg_ident.conf'       
+    port = 5432
+    
+    # Connection & Authentication
+    listen_addresses = '*'           # All K8s interfaces
+    max_connections = 100
+    superuser_reserved_connections = 3
+    
+    # Memory (1GB pod)
+    shared_buffers = 256MB
+    effective_cache_size = 768MB
+    work_mem = 8MB
+    maintenance_work_mem = 128MB
+    wal_buffers = 16MB
+    
+    # WAL & Checkpoints
+    checkpoint_completion_target = 0.9
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+    wal_level = replica
+    synchronous_commit = on
+    max_wal_senders = 5
+    
+    # Logging (K8s stdout)
+    log_destination = 'stderr'
+    logging_collector = off
+    log_statement = 'ddl'
+    log_min_duration_statement = 250
+    log_timezone = 'UTC'
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d '
+    
+    # Resource/Perf
+    shared_preload_libraries = 'pg_stat_statements'
+    autovacuum = on
+    autovacuum_max_workers = 3
+    autovacuum_vacuum_scale_factor = 0.1
+
+

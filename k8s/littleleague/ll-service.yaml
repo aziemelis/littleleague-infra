@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: littleleague
+  namespace: littleleague
+spec:
+  selector:
+    app: littleleague
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer

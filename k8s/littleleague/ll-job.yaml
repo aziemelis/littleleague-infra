@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-littleleague
+  namespace: littleleague
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init-db
+          image: postgres:15
+          command: [ 'sh', '-c' ]
+          args: # TODO SQL injection risk
+            - |
+              psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER password=$DB_PASSWORD" -c "
+                SELECT 'User exists' WHERE EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$LL_DB_USER')
+                UNION ALL SELECT 'User missing' WHERE NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$LL_DB_USER');
+              " | grep 'User missing' && 
+              psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER password=$DB_PASSWORD" -c "
+                CREATE USER $LL_DB_USER WITH PASSWORD '$LL_DB_PASSWORD';
+              ";
+          
+              psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER password=$DB_PASSWORD" -c "
+                SELECT 'DB exists' WHERE EXISTS (SELECT FROM pg_database WHERE datname = '$LL_DB_NAME')
+                UNION ALL SELECT 'DB missing' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$LL_DB_NAME');
+              " | grep 'DB missing' && 
+              psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER password=$DB_PASSWORD" -c "
+                CREATE DATABASE \"$LL_DB_NAME\" OWNER $LL_DB_USER;
+              ";
+          
+              psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER password=$DB_PASSWORD" -c "
+                GRANT ALL PRIVILEGES ON DATABASE \"$LL_DB_NAME\" TO $LL_DB_USER;
+              ";
+          
+              echo "Little League DB '$LL_DB_NAME' setup complete"
+          envFrom:
+            - configMapRef:
+                name: ll-configmap
+            - secretRef:
+                name: ll-secrets
+  backoffLimit: 5

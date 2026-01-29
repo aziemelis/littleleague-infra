@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: littleleague
+  namespace: littleleague
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: littleleague
+  template:
+    metadata:
+      labels:
+        app: littleleague
+    spec:
+      containers:
+        - name: littleleague
+          image: aziemelis/littleleague:6e142d0cf6244427e9f3c9f6472b1dceec2b9a4e
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: ll-configmap
+            - secretRef:
+                name: ll-secrets
