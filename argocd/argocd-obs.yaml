@@ -11,6 +11,22 @@ spec:
     chart: kube-prometheus-stack
     helm:
       values: |
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: true
+            annotations:
+              argocd.argoproj.io/hook: PreSync
+              argocd.argoproj.io/hook-delete-policy: HookSucceeded
+            patch:
+              annotations:
+                argocd.argoproj.io/hook: PreSync
+                argocd.argoproj.io/hook-delete-policy: HookSucceeded
+            mutatingWebhookConfiguration:
+              annotations:
+                argocd.argoproj.io/hook: PreSync
+            validatingWebhookConfiguration:
+              annotations:
+                argocd.argoproj.io/hook: PreSync
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
@@ -25,3 +41,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

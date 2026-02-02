@@ -4,3 +4,7 @@
 4. argocd admin initial-password -n argocd
 5. argocd login 127.0.0.1
 6. argocd account update-password (password=password)
+
+
+kubectl port-forward -n obs svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n obs svc/prometheus-grafana 3000:80
