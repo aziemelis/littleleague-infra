@@ -7,6 +7,6 @@ spec:
   selector:
     app: littleleague
   ports:
-    - port: 80
+    - port: 8888
       targetPort: 8080
   type: LoadBalancer
