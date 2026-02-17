@@ -31,12 +31,6 @@ spec:
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
-            serviceMonitorSelector: {}
-        
-        kubeStateMetrics:
-          serviceMonitor:
-            additionalLabels:
-              release: kube-prometheus-stack
         
         grafana:
           adminPassword: admin
