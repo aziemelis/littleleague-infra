@@ -27,9 +27,17 @@ spec:
             validatingWebhookConfiguration:
               annotations:
                 argocd.argoproj.io/hook: PreSync
+        
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelector: {}
+        
+        kubeStateMetrics:
+          serviceMonitor:
+            additionalLabels:
+              release: kube-prometheus-stack
+        
         grafana:
           adminPassword: admin
   destination:
